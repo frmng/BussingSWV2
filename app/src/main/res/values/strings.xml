@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">BussingSW</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="client_id">216430528785-3tk2lmml9ikn7j6un9bjvhlp1lgevi3u.apps.googleusercontent.com</string>
+</resources>
