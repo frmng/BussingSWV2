@@ -21,6 +21,9 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,6 +52,14 @@ public class ScannerFragment extends Fragment {
     private ExecutorService cameraExecutor;
     private static final int CAMERA_REQUEST_CODE = 1001;
     private boolean isScanning = true;
+
+    private NavController navController;
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        navController = NavHostFragment.findNavController(this);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -212,8 +223,15 @@ public class ScannerFragment extends Fragment {
                                                                     } else {
                                                                         Log.w("Notification", "User ID not found in ticketData");
                                                                     }
-                                                                })
 
+                                                                    // NAVIGATE TO HOME FRAGMENT
+                                                                    requireActivity().runOnUiThread(() -> {
+                                                                        // Prevent further scanning
+                                                                        isScanning = false;
+                                                                        navController.navigate(R.id.action_navigation_scanner_to_navigation_home);
+                                                                    });
+
+                                                                })
                                                                 .addOnFailureListener(e -> Log.e("Scanner", "Failed to save ticket", e));
                                                     }
                                                 });

@@ -12,14 +12,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import com.kmd.bussingswv2.R;
 import com.kmd.bussingswv2.MainActivity;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class SignIn extends AppCompatActivity {
 
@@ -48,7 +52,7 @@ public class SignIn extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
-        rootRef = database.getReference(); // Root of Realtime DB
+        rootRef = database.getReference();
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Logging in...");
@@ -71,7 +75,6 @@ public class SignIn extends AppCompatActivity {
                             FirebaseUser user = auth.getCurrentUser();
                             if (user != null) {
                                 String uid = user.getUid();
-
                                 String name;
                                 String profileUrl = "https://yourdomain.com/default_profile.png";
 
@@ -83,21 +86,40 @@ public class SignIn extends AppCompatActivity {
                                     name = "Bus Driver";
                                 }
 
-                                DUser dUser = new DUser(uid, profileUrl, name, emailInput);
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                                String createdAt = sdf.format(new Date());
 
-                                // 🔧 Set value and log error if it fails
-                                rootRef.child("DUsers").child(uid).setValue(dUser)
-                                        .addOnSuccessListener(unused -> {
-                                            progressDialog.dismiss();
-                                            Toast.makeText(SignIn.this, "Logged in and stored data successfully!", Toast.LENGTH_SHORT).show();
-                                            startActivity(new Intent(SignIn.this, MainActivity.class));
-                                            finish();
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            progressDialog.dismiss();
-                                            Log.e("FirebaseDB", "Failed to save user: ", e);
-                                            Toast.makeText(SignIn.this, "DB Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                        });
+                                DatabaseReference userRef = rootRef.child("DUsers").child(uid);
+
+                                userRef.get().addOnSuccessListener(snapshot -> {
+                                    if (!snapshot.exists()) {
+                                        // User does not exist - create full user data
+                                        DUser dUser = new DUser(uid, profileUrl, name, emailInput, createdAt);
+                                        userRef.setValue(dUser)
+                                                .addOnSuccessListener(unused -> {
+                                                    progressDialog.dismiss();
+                                                    Toast.makeText(SignIn.this, "Logged in and stored data successfully!", Toast.LENGTH_SHORT).show();
+                                                    startActivity(new Intent(SignIn.this, MainActivity.class));
+                                                    finish();
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    progressDialog.dismiss();
+                                                    Toast.makeText(SignIn.this, "DB Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                                });
+                                    } else {
+                                        userRef.child("name").setValue(name);
+                                        userRef.child("email").setValue(emailInput);
+                                        userRef.child("profile").setValue(profileUrl);
+
+                                        progressDialog.dismiss();
+                                        Toast.makeText(SignIn.this, "Logged in successfully!", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(SignIn.this, MainActivity.class));
+                                        finish();
+                                    }
+                                }).addOnFailureListener(e -> {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(SignIn.this, "Failed to fetch user data: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                });
                             }
                         } else {
                             progressDialog.dismiss();
@@ -105,5 +127,6 @@ public class SignIn extends AppCompatActivity {
                         }
                     });
         });
+
     }
 }

@@ -6,12 +6,14 @@ public class DUser {
     String name;
     String profile;
     String email;
+    String createdAt;
 
-    public DUser(String userId, String profile, String name, String email) {
+    public DUser(String userId, String profile, String name, String email, String createdAt) {
         this.userId = userId;
         this.profile = profile;
         this.name = name;
         this.email = email;
+        this.createdAt = createdAt;
     }
 
     public DUser() {}
@@ -46,5 +48,13 @@ public class DUser {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 }
