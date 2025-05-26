@@ -225,11 +225,19 @@ public class ScannerFragment extends Fragment {
                                                                     }
 
                                                                     // NAVIGATE TO HOME FRAGMENT
-                                                                    requireActivity().runOnUiThread(() -> {
-                                                                        // Prevent further scanning
-                                                                        isScanning = false;
-                                                                        navController.navigate(R.id.action_navigation_scanner_to_navigation_home);
-                                                                    });
+                                                                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                                                        navController.navigate(
+                                                                                R.id.action_navigation_scanner_to_navigation_home,
+                                                                                null,
+                                                                                new androidx.navigation.NavOptions.Builder()
+                                                                                        .setEnterAnim(R.anim.slide_in_left)
+                                                                                        .setExitAnim(R.anim.slide_out_right)
+                                                                                        .setPopEnterAnim(R.anim.slide_in_right)
+                                                                                        .setPopExitAnim(R.anim.slide_out_left)
+                                                                                        .build()
+                                                                        );
+                                                                    }, 800);
+
 
                                                                 })
                                                                 .addOnFailureListener(e -> Log.e("Scanner", "Failed to save ticket", e));
